@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../core/widgets/priorix_mark.dart';
 
 /// Picks up exactly where the native splash leaves off (same color, same mark
-/// at the same size and position), then unveils the wordmark.
+/// at the same size and position). The mark never moves: a gold light sweeps
+/// once around the four quadrants, settles back on the first — what matters —
+/// with a soft pulse, and the wordmark is unveiled beneath it.
 class PriorixSplash extends StatefulWidget {
   const PriorixSplash({super.key, required this.onFinished});
 
@@ -10,6 +12,9 @@ class PriorixSplash extends StatefulWidget {
 
   /// Must match the native splash: 400 px mark in a 4x image → 100 dp.
   static const markSize = 100.0;
+
+  /// The native splash logo is rendered with this halo strength.
+  static const nativeGlow = 0.7;
 
   @override
   State<PriorixSplash> createState() => _PriorixSplashState();
@@ -19,15 +24,55 @@ class _PriorixSplashState extends State<PriorixSplash>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1700),
+    duration: const Duration(milliseconds: 2300),
   );
+
+  late final Animation<double> _light = Tween<double>(
+    begin: 0,
+    end: 4,
+  ).animate(_interval(0.06, 0.62, Curves.easeInOutCubic));
+
+  // Halo: native strength while sweeping, a soft bloom as the light lands
+  // back on the first quadrant, then rest.
+  late final Animation<double> _glow = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: ConstantTween(PriorixSplash.nativeGlow),
+      weight: 56,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: PriorixSplash.nativeGlow,
+        end: 1.6,
+      ).chain(CurveTween(curve: Curves.easeOutCubic)),
+      weight: 10,
+    ),
+    TweenSequenceItem(
+      tween: Tween(
+        begin: 1.6,
+        end: 1.0,
+      ).chain(CurveTween(curve: Curves.easeInOutSine)),
+      weight: 20,
+    ),
+    TweenSequenceItem(tween: ConstantTween(1.0), weight: 14),
+  ]).animate(_controller);
+
+  late final Animation<double> _ambient = _interval(0.56, 0.8);
+  late final Animation<double> _word = _interval(0.6, 0.86);
+  late final Animation<double> _rule = _interval(
+    0.66,
+    0.9,
+    Curves.easeInOutCubic,
+  );
+  late final Animation<double> _tagline = _interval(0.72, 0.96);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_controller.isAnimating || _controller.isCompleted) return;
     if (MediaQuery.disableAnimationsOf(context)) {
-      _controller.duration = const Duration(milliseconds: 400);
+      _controller.value = 1;
+      Future.delayed(const Duration(milliseconds: 500), widget.onFinished);
+      return;
     }
     _controller.forward().whenComplete(widget.onFinished);
   }
@@ -51,52 +96,44 @@ class _PriorixSplashState extends State<PriorixSplash>
 
   @override
   Widget build(BuildContext context) {
-    final lift = _interval(0.12, 0.5);
-    final glow = _interval(0.0, 0.4, Curves.easeInOut);
-    final word = _interval(0.3, 0.7);
-    final tagline = _interval(0.45, 0.85);
-    final line = _interval(0.35, 0.8, Curves.easeInOutCubic);
-
     // Material (not a bare ColoredBox) so text gets proper defaults.
     return Material(
       color: BrandColors.ink,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {
-          final height = MediaQuery.sizeOf(context).height;
           final markBottom =
-              height / 2 + PriorixSplash.markSize / 2 - 44 * lift.value;
+              MediaQuery.sizeOf(context).height / 2 +
+              PriorixSplash.markSize / 2;
           return Stack(
             alignment: Alignment.center,
             children: [
-              // Warm ambient light that blooms behind the mark.
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
-                      center: const Alignment(0, -0.12),
-                      radius: 0.75,
+                      radius: 0.7,
                       colors: [
-                        BrandColors.gold.withValues(alpha: 0.09 * glow.value),
+                        BrandColors.gold.withValues(
+                          alpha: 0.08 * _ambient.value,
+                        ),
                         BrandColors.gold.withValues(alpha: 0),
                       ],
                     ),
                   ),
                 ),
               ),
-              Transform.translate(
-                offset: Offset(0, -44 * lift.value),
-                child: PriorixMark(
-                  size: PriorixSplash.markSize,
-                  glow: 0.7 + 0.3 * glow.value,
-                ),
+              PriorixMark(
+                size: PriorixSplash.markSize,
+                light: _light.value,
+                glow: _glow.value,
               ),
               Positioned(
                 left: 0,
                 right: 0,
-                top: markBottom + 32 + 12 * (1 - word.value),
+                top: markBottom + 40 + 10 * (1 - _word.value),
                 child: Opacity(
-                  opacity: word.value,
+                  opacity: _word.value,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -104,20 +141,20 @@ class _PriorixSplashState extends State<PriorixSplash>
                         'PRIORIX',
                         style: TextStyle(
                           color: BrandColors.ivory,
-                          fontSize: 22,
+                          fontSize: 21,
                           fontWeight: FontWeight.w300,
-                          letterSpacing: 12 - 3 * word.value,
+                          letterSpacing: 13 - 4 * _word.value,
                         ),
                       ),
                       const SizedBox(height: 14),
                       SizedBox(
-                        width: 36 * line.value,
+                        width: 32 * _rule.value,
                         height: 1,
                         child: const ColoredBox(color: BrandColors.gold),
                       ),
                       const SizedBox(height: 14),
                       Opacity(
-                        opacity: tagline.value,
+                        opacity: _tagline.value,
                         child: Text(
                           'Decide qué importa primero',
                           style: TextStyle(

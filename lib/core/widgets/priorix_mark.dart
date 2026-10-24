@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /// Brand colors for the mark and splash. Fixed across themes so the native
@@ -19,16 +20,18 @@ class PriorixMark extends StatelessWidget {
   const PriorixMark({
     super.key,
     this.size = 120,
-    this.reveal = 1,
+    this.light = 0,
     this.glow = 1,
   });
 
   final double size;
 
-  /// 0–1: staggers the three secondary quadrants in (used by the splash).
-  final double reveal;
+  /// Where the gold light sits as it travels clockwise around the quadrants:
+  /// 0 = first quadrant (rest), 1 = second, 2 = fourth, 3 = third, 4 = back to
+  /// the first. Fractional values blend between neighbours.
+  final double light;
 
-  /// 0–1: strength of the soft halo behind the lit quadrant.
+  /// Strength of the soft halo behind lit quadrants (1 = default).
   final double glow;
 
   @override
@@ -36,7 +39,7 @@ class PriorixMark extends StatelessWidget {
     return SizedBox.square(
       dimension: size,
       child: CustomPaint(
-        painter: PriorixMarkPainter(reveal: reveal, glow: glow),
+        painter: PriorixMarkPainter(light: light, glow: glow),
       ),
     );
   }
@@ -44,20 +47,24 @@ class PriorixMark extends StatelessWidget {
 
 class PriorixMarkPainter extends CustomPainter {
   const PriorixMarkPainter({
-    this.reveal = 1,
+    this.light = 0,
     this.glow = 1,
     this.monochrome = false,
   });
 
-  final double reveal;
+  final double light;
   final double glow;
 
   /// White silhouette on transparent, as Android requires for the
   /// notification (status bar) icon.
   final bool monochrome;
 
-  // Presence of the secondary quadrants, by Eisenhower order.
-  static const _secondaryAlpha = [0.17, 0.11, 0.065];
+  /// Resting presence of each quadrant when unlit, in clockwise order
+  /// (Q1, Q2, Q4, Q3) — fading with Eisenhower priority.
+  static const _dimAlpha = [0.2, 0.17, 0.065, 0.11];
+
+  /// How far (in quadrants) the light spreads into its neighbours.
+  static const _spread = 0.85;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -84,69 +91,92 @@ class PriorixMarkPainter extends CustomPainter {
       );
     }
 
-    final lit = piece(0, 0);
-    final secondary = [piece(1, 0), piece(0, 1), piece(1, 1)];
+    // Clockwise: Q1 → Q2 → Q4 → Q3.
+    final pieces = [piece(0, 0), piece(1, 0), piece(1, 1), piece(0, 1)];
+
     if (monochrome) {
-      canvas.drawRRect(lit, Paint()..color = Colors.white);
-      for (final rrect in secondary) {
+      for (var i = 0; i < pieces.length; i++) {
         canvas.drawRRect(
-          rrect,
-          Paint()..color = Colors.white.withValues(alpha: 0.42),
+          pieces[i],
+          Paint()..color = Colors.white.withValues(alpha: i == 0 ? 1 : 0.42),
         );
       }
       return;
     }
 
+    final intensity = [for (var i = 0; i < 4; i++) _intensity(i)];
+
     if (glow > 0) {
-      canvas.drawRRect(
-        lit.inflate(s * 0.01),
-        Paint()
-          ..color = BrandColors.gold.withValues(alpha: 0.3 * glow)
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.07),
-      );
+      for (var i = 0; i < 4; i++) {
+        if (intensity[i] == 0) continue;
+        canvas.drawRRect(
+          pieces[i].inflate(s * 0.01),
+          Paint()
+            ..color = BrandColors.gold.withValues(
+              alpha: (0.3 * glow * intensity[i]).clamp(0.0, 1.0),
+            )
+            ..maskFilter = MaskFilter.blur(BlurStyle.normal, s * 0.07),
+        );
+      }
     }
 
-    for (var i = 0; i < secondary.length; i++) {
-      final t = ((reveal * 3) - i).clamp(0.0, 1.0);
-      if (t == 0) continue;
+    for (var i = 0; i < 4; i++) {
+      final lit = intensity[i];
+      final rrect = pieces[i];
+      if (lit < 1) {
+        canvas.drawRRect(
+          rrect,
+          Paint()
+            ..color = BrandColors.ivory.withValues(
+              alpha: _dimAlpha[i] * (1 - lit),
+            ),
+        );
+      }
+      if (lit == 0) continue;
+      // Gold gains presence faster than the grey loses it, so hand-offs stay
+      // luminous instead of passing through a muddy half-tone.
+      final gold = math.sqrt(lit);
+      final bounds = rrect.outerRect;
       canvas.drawRRect(
-        secondary[i],
+        rrect,
         Paint()
-          ..color = BrandColors.ivory.withValues(alpha: _secondaryAlpha[i] * t),
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              BrandColors.goldLight.withValues(alpha: gold),
+              BrandColors.gold.withValues(alpha: gold),
+              BrandColors.goldDeep.withValues(alpha: gold),
+            ],
+            stops: const [0, 0.55, 1],
+          ).createShader(bounds),
+      );
+      // Soft sheen fading out by mid-height — reads as a machined surface.
+      canvas.drawRRect(
+        rrect,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.center,
+            colors: [
+              Colors.white.withValues(alpha: 0.2 * gold),
+              Colors.white.withValues(alpha: 0),
+            ],
+          ).createShader(bounds),
       );
     }
+  }
 
-    final bounds = lit.outerRect;
-    canvas.drawRRect(
-      lit,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            BrandColors.goldLight,
-            BrandColors.gold,
-            BrandColors.goldDeep,
-          ],
-          stops: [0, 0.55, 1],
-        ).createShader(bounds),
-    );
-    // Soft sheen fading out by mid-height — reads as a machined surface.
-    canvas.drawRRect(
-      lit,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.center,
-          colors: [
-            Colors.white.withValues(alpha: 0.2),
-            Colors.white.withValues(alpha: 0),
-          ],
-        ).createShader(bounds),
-    );
+  /// 0–1 light on quadrant [index] (clockwise order), smoothstepped so the
+  /// hand-off between neighbours has no visible seams.
+  double _intensity(int index) {
+    var distance = (light - index).abs() % 4;
+    if (distance > 2) distance = 4 - distance;
+    final t = (1 - distance / _spread).clamp(0.0, 1.0);
+    return t * t * (3 - 2 * t);
   }
 
   @override
   bool shouldRepaint(PriorixMarkPainter old) =>
-      old.reveal != reveal || old.glow != glow || old.monochrome != monochrome;
+      old.light != light || old.glow != glow || old.monochrome != monochrome;
 }
