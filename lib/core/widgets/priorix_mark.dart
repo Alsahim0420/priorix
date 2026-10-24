@@ -43,10 +43,18 @@ class PriorixMark extends StatelessWidget {
 }
 
 class PriorixMarkPainter extends CustomPainter {
-  const PriorixMarkPainter({this.reveal = 1, this.glow = 1});
+  const PriorixMarkPainter({
+    this.reveal = 1,
+    this.glow = 1,
+    this.monochrome = false,
+  });
 
   final double reveal;
   final double glow;
+
+  /// White silhouette on transparent, as Android requires for the
+  /// notification (status bar) icon.
+  final bool monochrome;
 
   // Presence of the secondary quadrants, by Eisenhower order.
   static const _secondaryAlpha = [0.17, 0.11, 0.065];
@@ -77,6 +85,18 @@ class PriorixMarkPainter extends CustomPainter {
     }
 
     final lit = piece(0, 0);
+    final secondary = [piece(1, 0), piece(0, 1), piece(1, 1)];
+    if (monochrome) {
+      canvas.drawRRect(lit, Paint()..color = Colors.white);
+      for (final rrect in secondary) {
+        canvas.drawRRect(
+          rrect,
+          Paint()..color = Colors.white.withValues(alpha: 0.42),
+        );
+      }
+      return;
+    }
+
     if (glow > 0) {
       canvas.drawRRect(
         lit.inflate(s * 0.01),
@@ -86,7 +106,6 @@ class PriorixMarkPainter extends CustomPainter {
       );
     }
 
-    final secondary = [piece(1, 0), piece(0, 1), piece(1, 1)];
     for (var i = 0; i < secondary.length; i++) {
       final t = ((reveal * 3) - i).clamp(0.0, 1.0);
       if (t == 0) continue;
@@ -129,5 +148,5 @@ class PriorixMarkPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(PriorixMarkPainter old) =>
-      old.reveal != reveal || old.glow != glow;
+      old.reveal != reveal || old.glow != glow || old.monochrome != monochrome;
 }

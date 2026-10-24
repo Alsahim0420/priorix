@@ -56,7 +56,9 @@ Future<void> _render(
   );
   await expectLater(
     find.byType(RepaintBoundary).first,
-    matchesGoldenFile('../assets/brand/$name.png'),
+    matchesGoldenFile(
+      name.startsWith('../') ? '$name.png' : '../assets/brand/$name.png',
+    ),
   );
 }
 
@@ -85,5 +87,29 @@ void main() {
       1152,
       'splash_android12',
     );
+
+    // Android notification icon: 24dp with 2dp padding, per density.
+    for (final (density, scale) in [
+      ('mdpi', 1.0),
+      ('hdpi', 1.5),
+      ('xhdpi', 2.0),
+      ('xxhdpi', 3.0),
+      ('xxxhdpi', 4.0),
+    ]) {
+      final px = 24 * scale;
+      await _render(
+        tester,
+        Center(
+          child: SizedBox.square(
+            dimension: 20 * scale,
+            child: const CustomPaint(
+              painter: PriorixMarkPainter(monochrome: true),
+            ),
+          ),
+        ),
+        px,
+        '../android/app/src/main/res/drawable-$density/ic_stat_priorix',
+      );
+    }
   });
 }

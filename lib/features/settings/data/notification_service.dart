@@ -16,6 +16,10 @@ class NotificationService {
   /// and keep the soonest ones when rescheduling everything.
   static const _maxPending = 60;
 
+  /// Monochrome status-bar icon in android/app/src/main/res/drawable-*/,
+  /// rendered from the brand mark (see test/brand_assets_test.dart).
+  static const _androidIcon = 'ic_stat_priorix';
+
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
   bool _ready = false;
@@ -27,6 +31,7 @@ class NotificationService {
       channelDescription: 'Avisos según el tiempo restante de tus tareas.',
       importance: Importance.high,
       priority: Priority.high,
+      icon: _androidIcon,
       color: AppColors.gold,
     ),
     iOS: DarwinNotificationDetails(
@@ -47,7 +52,7 @@ class NotificationService {
     if (kIsWeb || Platform.isLinux || Platform.isWindows) return;
     tz_data.initializeTimeZones();
     await _configureLocalTimeZone();
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings(_androidIcon);
     const darwin = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
