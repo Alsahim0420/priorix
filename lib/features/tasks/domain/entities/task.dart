@@ -2,35 +2,60 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 
-enum TaskQuadrant { doNow, schedule, delegate, later }
+enum TaskQuadrant { doNow, schedule, delegate, eliminate }
 
 extension TaskQuadrantX on TaskQuadrant {
+  static TaskQuadrant from({required bool urgent, required bool important}) {
+    if (urgent && important) return TaskQuadrant.doNow;
+    if (important) return TaskQuadrant.schedule;
+    if (urgent) return TaskQuadrant.delegate;
+    return TaskQuadrant.eliminate;
+  }
+
+  bool get isUrgent =>
+      this == TaskQuadrant.doNow || this == TaskQuadrant.delegate;
+
+  bool get isImportant =>
+      this == TaskQuadrant.doNow || this == TaskQuadrant.schedule;
+
   String get title => switch (this) {
-    TaskQuadrant.doNow => 'Do Now',
-    TaskQuadrant.schedule => 'Schedule',
-    TaskQuadrant.delegate => 'Delegate',
-    TaskQuadrant.later => 'Later',
+    TaskQuadrant.doNow => 'Hacer ya',
+    TaskQuadrant.schedule => 'Planificar',
+    TaskQuadrant.delegate => 'Delegar',
+    TaskQuadrant.eliminate => 'Eliminar',
   };
 
   String get subtitle => switch (this) {
-    TaskQuadrant.doNow => 'Urgent + important',
-    TaskQuadrant.schedule => 'Important, not urgent',
-    TaskQuadrant.delegate => 'Urgent, less important',
-    TaskQuadrant.later => 'Not urgent, not important',
+    TaskQuadrant.doNow => 'Urgente e importante',
+    TaskQuadrant.schedule => 'Importante, no urgente',
+    TaskQuadrant.delegate => 'Urgente, no importante',
+    TaskQuadrant.eliminate => 'Ni urgente ni importante',
   };
+
+  String get guidance => switch (this) {
+    TaskQuadrant.doNow => 'Hazlo hoy. Es lo que más impacto tiene ahora mismo.',
+    TaskQuadrant.schedule =>
+      'Reserva un bloque en tu agenda y protégelo. Aquí vive el trabajo que te hace avanzar.',
+    TaskQuadrant.delegate =>
+      'Encuentra a alguien que pueda resolverlo por ti y haz seguimiento.',
+    TaskQuadrant.eliminate =>
+      'Suéltalo o déjalo para cuando sobre tiempo. Menos ruido, más foco.',
+  };
+
+  String get code => 'Q${index + 1}';
 
   IconData get icon => switch (this) {
     TaskQuadrant.doNow => Icons.bolt_rounded,
     TaskQuadrant.schedule => Icons.event_available_rounded,
-    TaskQuadrant.delegate => Icons.outbound_rounded,
-    TaskQuadrant.later => Icons.bookmark_added_rounded,
+    TaskQuadrant.delegate => Icons.people_alt_rounded,
+    TaskQuadrant.eliminate => Icons.remove_circle_outline_rounded,
   };
 
   Color get color => switch (this) {
-    TaskQuadrant.doNow => AppColors.primaryGold,
-    TaskQuadrant.schedule => AppColors.emerald,
-    TaskQuadrant.delegate => AppColors.royalBlue,
-    TaskQuadrant.later => AppColors.textSecondary,
+    TaskQuadrant.doNow => AppColors.ember,
+    TaskQuadrant.schedule => AppColors.jade,
+    TaskQuadrant.delegate => AppColors.iris,
+    TaskQuadrant.eliminate => AppColors.stone,
   };
 }
 
@@ -47,12 +72,18 @@ class Task extends Equatable {
     required this.isCompleted,
     required this.createdAt,
     required this.updatedAt,
+    this.alertThresholds = const [],
+    this.notifyAtDeadline = true,
   });
 
   final String id;
   final String title;
   final String? description;
+
+  /// Deadline (date and time).
   final DateTime? dueDate;
+
+  /// Optional one-off reminder at an exact moment.
   final DateTime? reminderAt;
   final String? category;
   final bool isUrgent;
@@ -61,12 +92,26 @@ class Task extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  TaskQuadrant get quadrant {
-    if (isUrgent && isImportant) return TaskQuadrant.doNow;
-    if (!isUrgent && isImportant) return TaskQuadrant.schedule;
-    if (isUrgent && !isImportant) return TaskQuadrant.delegate;
-    return TaskQuadrant.later;
+  /// Percentages of time remaining (between [createdAt] and [dueDate]) at
+  /// which to notify, e.g. `[50, 20]`.
+  final List<int> alertThresholds;
+  final bool notifyAtDeadline;
+
+  TaskQuadrant get quadrant =>
+      TaskQuadrantX.from(urgent: isUrgent, important: isImportant);
+
+  /// Fraction of the time window already consumed (0–1), or null without a
+  /// deadline.
+  double? elapsedFraction(DateTime now) {
+    final due = dueDate;
+    if (due == null) return null;
+    final total = due.difference(createdAt).inSeconds;
+    if (total <= 0) return now.isBefore(due) ? 0 : 1;
+    return (now.difference(createdAt).inSeconds / total).clamp(0.0, 1.0);
   }
+
+  bool isOverdue(DateTime now) =>
+      !isCompleted && dueDate != null && now.isAfter(dueDate!);
 
   Task copyWith({
     String? id,
@@ -80,6 +125,8 @@ class Task extends Equatable {
     bool? isCompleted,
     DateTime? createdAt,
     DateTime? updatedAt,
+    List<int>? alertThresholds,
+    bool? notifyAtDeadline,
     bool clearDescription = false,
     bool clearDueDate = false,
     bool clearReminder = false,
@@ -97,6 +144,8 @@ class Task extends Equatable {
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      alertThresholds: alertThresholds ?? this.alertThresholds,
+      notifyAtDeadline: notifyAtDeadline ?? this.notifyAtDeadline,
     );
   }
 
@@ -113,5 +162,7 @@ class Task extends Equatable {
     isCompleted,
     createdAt,
     updatedAt,
+    alertThresholds,
+    notifyAtDeadline,
   ];
 }

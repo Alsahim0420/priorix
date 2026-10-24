@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../../../app/theme/app_colors.dart';
 import '../domain/task_category.dart';
@@ -11,39 +10,39 @@ class CategoryLocalDataSource {
 
   static final defaultCategories = [
     TaskCategory(
-      name: 'Work',
+      name: 'Trabajo',
       iconKey: 'briefcase',
-      colorValue: AppColors.primaryGold.toARGB32(),
+      colorValue: AppColors.gold.toARGB32(),
     ),
     TaskCategory(
       name: 'Personal',
       iconKey: 'person',
-      colorValue: AppColors.emerald.toARGB32(),
+      colorValue: AppColors.jade.toARGB32(),
     ),
     TaskCategory(
-      name: 'Finance',
+      name: 'Finanzas',
       iconKey: 'finance',
-      colorValue: const Color(0xFFF59E0B).toARGB32(),
+      colorValue: AppColors.amber.toARGB32(),
     ),
     TaskCategory(
-      name: 'Health',
+      name: 'Salud',
       iconKey: 'health',
       colorValue: AppColors.success.toARGB32(),
     ),
     TaskCategory(
-      name: 'Learning',
+      name: 'Aprendizaje',
       iconKey: 'learning',
-      colorValue: AppColors.royalBlue.toARGB32(),
+      colorValue: AppColors.iris.toARGB32(),
     ),
     TaskCategory(
-      name: 'Errands',
+      name: 'Recados',
       iconKey: 'errands',
-      colorValue: const Color(0xFFF472B6).toARGB32(),
+      colorValue: AppColors.rose.toARGB32(),
     ),
     TaskCategory(
       name: 'Ideas',
       iconKey: 'ideas',
-      colorValue: const Color(0xFFA78BFA).toARGB32(),
+      colorValue: AppColors.violet.toARGB32(),
     ),
   ];
 
@@ -94,7 +93,7 @@ class CategoryLocalDataSource {
       orElse: () => TaskCategory(
         name: trimmed,
         iconKey: 'folder',
-        colorValue: AppColors.primaryGold.toARGB32(),
+        colorValue: AppColors.gold.toARGB32(),
       ),
     );
   }
