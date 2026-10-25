@@ -1,179 +1,242 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_text_styles.dart';
-import '../../../../core/widgets/glass_card.dart';
-import '../../../../core/widgets/luxury_button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/theme/app_palette.dart';
+import '../../../../core/widgets/layout.dart';
+import '../../../../core/widgets/p_button.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
+import '../../domain/entities/task.dart';
 
-class OnboardingPage extends StatelessWidget {
-  const OnboardingPage({super.key, required this.onStart});
+class OnboardingPage extends StatefulWidget {
+  const OnboardingPage({super.key});
 
-  final VoidCallback onStart;
+  @override
+  State<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends State<OnboardingPage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _intro = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1600),
+  )..forward();
+  final _name = TextEditingController();
+
+  @override
+  void dispose() {
+    _intro.dispose();
+    _name.dispose();
+    super.dispose();
+  }
+
+  Widget _reveal(double start, Widget child) {
+    final curve = CurvedAnimation(
+      parent: _intro,
+      curve: Interval(
+        start,
+        (start + 0.4).clamp(0, 1),
+        curve: Curves.easeOutCubic,
+      ),
+    );
+    return FadeTransition(
+      opacity: curve,
+      child: SlideTransition(
+        position: Tween(
+          begin: const Offset(0, 0.08),
+          end: Offset.zero,
+        ).animate(curve),
+        child: child,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final p = context.palette;
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.background,
-              Color(0xFF0B1526),
-              AppColors.surface,
-            ],
-          ),
-        ),
+      body: PremiumBackground(
         child: SafeArea(
           child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth >= 760;
-              final logoSize =
-                  (isWide
-                          ? constraints.maxHeight * 0.34
-                          : constraints.maxWidth * 0.36)
-                      .clamp(118.0, isWide ? 280.0 : 180.0);
-
-              return SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isWide ? 40 : 24,
-                  vertical: isWide ? 28 : 24,
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 48,
                 ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - (isWide ? 56 : 48),
-                  ),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 980),
-                      child: isWide
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _QuadrantLogo(size: logoSize),
-                                const SizedBox(width: 52),
-                                Flexible(
-                                  child: _OnboardingContent(
-                                    onStart: onStart,
-                                    alignStart: true,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _QuadrantLogo(size: logoSize),
-                                const SizedBox(height: 26),
-                                _OnboardingContent(onStart: onStart),
-                              ],
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _MatrixLogo(animation: _intro),
+                        const SizedBox(height: 40),
+                        _reveal(
+                          0.25,
+                          Text('Priorix', style: context.text.displayMedium),
+                        ),
+                        const SizedBox(height: 8),
+                        _reveal(
+                          0.3,
+                          Text(
+                            'Decide qué importa primero.',
+                            style: context.text.titleMedium?.copyWith(
+                              color: p.accent,
                             ),
+                          ),
+                        ),
+                        const SizedBox(height: 36),
+                        _reveal(
+                          0.4,
+                          const _Feature(
+                            icon: Icons.grid_view_rounded,
+                            title: 'Matriz de Eisenhower',
+                            text:
+                                'Clasifica cada tarea por urgencia e importancia.',
+                          ),
+                        ),
+                        _reveal(
+                          0.48,
+                          const _Feature(
+                            icon: Icons.hourglass_bottom_rounded,
+                            title: 'Alertas según el tiempo restante',
+                            text:
+                                'Te avisa cuando quede el 50 %, el 20 % o lo que tú elijas.',
+                          ),
+                        ),
+                        _reveal(
+                          0.56,
+                          const _Feature(
+                            icon: Icons.lock_outline_rounded,
+                            title: 'Privado y local',
+                            text: 'Tus datos nunca salen de este dispositivo.',
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        _reveal(
+                          0.62,
+                          TextField(
+                            controller: _name,
+                            textCapitalization: TextCapitalization.words,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _start(),
+                            decoration: const InputDecoration(
+                              hintText: '¿Cómo te llamas? (opcional)',
+                              prefixIcon: Icon(Icons.person_outline_rounded),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _reveal(
+                          0.66,
+                          PButton(
+                            label: 'Comenzar',
+                            icon: Icons.arrow_forward_rounded,
+                            onPressed: _start,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+
+  void _start() {
+    context.read<SettingsCubit>().completeOnboarding(name: _name.text);
+  }
 }
 
-class _OnboardingContent extends StatelessWidget {
-  const _OnboardingContent({required this.onStart, this.alignStart = false});
+class _Feature extends StatelessWidget {
+  const _Feature({required this.icon, required this.title, required this.text});
 
-  final VoidCallback onStart;
-  final bool alignStart;
+  final IconData icon;
+  final String title;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    final textAlign = alignStart ? TextAlign.left : TextAlign.center;
-    final crossAxisAlignment = alignStart
-        ? CrossAxisAlignment.start
-        : CrossAxisAlignment.center;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        Text('Priorix', style: AppTextStyles.display, textAlign: textAlign),
-        const SizedBox(height: 8),
-        Text(
-          'Decide what matters first.',
-          style: const TextStyle(
-            color: AppColors.primaryGold,
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
+    final p = context.palette;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: p.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: p.hairline),
+            ),
+            child: Icon(icon, size: 19, color: p.accent),
           ),
-          textAlign: textAlign,
-        ),
-        const SizedBox(height: 22),
-        GlassCard(
-          child: Text(
-            'A luxury productivity command center for separating signal from noise with the Eisenhower Matrix.',
-            style: AppTextStyles.body,
-            textAlign: textAlign,
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: context.text.titleSmall),
+                const SizedBox(height: 2),
+                Text(text, style: context.text.bodyMedium),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 28),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 320),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              LuxuryButton(
-                label: 'Start prioritizing',
-                icon: Icons.arrow_forward_rounded,
-                onPressed: onStart,
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: onStart,
-                child: const Text('I already have an account'),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-class _QuadrantLogo extends StatelessWidget {
-  const _QuadrantLogo({required this.size});
+class _MatrixLogo extends StatelessWidget {
+  const _MatrixLogo({required this.animation});
 
-  final double size;
+  final Animation<double> animation;
 
   @override
   Widget build(BuildContext context) {
-    const colors = [
-      AppColors.primaryGold,
-      AppColors.emerald,
-      AppColors.royalBlue,
-      AppColors.goldDark,
-    ];
-    return GlassCard(
-      padding: const EdgeInsets.all(14),
-      borderColor: AppColors.primaryGold.withValues(alpha: 0.5),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: GridView.count(
-          crossAxisCount: 2,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          children: List.generate(
-            4,
-            (index) => DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors[index].withValues(alpha: 0.78),
-                borderRadius: BorderRadius.circular(22),
+    const size = 84.0;
+    const gap = 6.0;
+    const cell = (size - gap) / 2;
+    return SizedBox.square(
+      dimension: size,
+      child: Wrap(
+        spacing: gap,
+        runSpacing: gap,
+        children: [
+          for (final quadrant in TaskQuadrant.values)
+            ScaleTransition(
+              scale: CurvedAnimation(
+                parent: animation,
+                curve: Interval(
+                  quadrant.index * 0.07,
+                  0.35 + quadrant.index * 0.07,
+                  curve: Curves.easeOutBack,
+                ),
+              ),
+              child: Container(
+                width: cell,
+                height: cell,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      quadrant.color,
+                      quadrant.color.withValues(alpha: 0.6),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
+        ],
       ),
     );
   }

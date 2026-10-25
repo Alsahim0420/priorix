@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import '../../../settings/data/notification_service.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/task.dart';
+import '../../domain/services/deadline_alert_planner.dart';
 import '../../domain/usecases/create_task.dart';
 import '../../domain/usecases/delete_task.dart';
 import '../../domain/usecases/get_tasks.dart';
@@ -30,8 +31,13 @@ class TaskCubit extends Cubit<TaskState> {
   final SettingsCubit settingsCubit;
   final _uuid = const Uuid();
 
+  bool get _notificationsEnabled =>
+      settingsCubit.state.settings.notificationsEnabled;
+
   Future<void> loadTasks() async {
-    emit(state.copyWith(status: TaskStatus.loading));
+    if (state.status == TaskStatus.initial) {
+      emit(state.copyWith(status: TaskStatus.loading));
+    }
     try {
       emit(
         TaskState(status: TaskStatus.success, tasks: await getTasksUseCase()),
@@ -49,6 +55,9 @@ class TaskCubit extends Cubit<TaskState> {
     String? category,
     required bool isUrgent,
     required bool isImportant,
+    List<int> alertThresholds = const [],
+    bool notifyAtDeadline = true,
+    DateTime? createdAt,
   }) async {
     final now = DateTime.now();
     final task = Task(
@@ -61,60 +70,66 @@ class TaskCubit extends Cubit<TaskState> {
       isUrgent: isUrgent,
       isImportant: isImportant,
       isCompleted: false,
-      createdAt: now,
+      createdAt: createdAt ?? now,
       updatedAt: now,
+      alertThresholds: DeadlineAlertPlanner.normalize(alertThresholds),
+      notifyAtDeadline: notifyAtDeadline,
     );
     await createTaskUseCase(task);
-    await _syncReminder(task);
+    await _syncAlerts(task);
     await loadTasks();
   }
 
   Future<void> updateTask(Task task) async {
-    final updated = task.copyWith(updatedAt: DateTime.now());
+    final updated = task.copyWith(
+      updatedAt: DateTime.now(),
+      alertThresholds: DeadlineAlertPlanner.normalize(task.alertThresholds),
+    );
     await updateTaskUseCase(updated);
-    await _syncReminder(updated);
+    await _syncAlerts(updated);
     await loadTasks();
+  }
+
+  Future<void> moveToQuadrant(Task task, TaskQuadrant quadrant) {
+    if (task.quadrant == quadrant) return Future.value();
+    return updateTask(
+      task.copyWith(
+        isUrgent: quadrant.isUrgent,
+        isImportant: quadrant.isImportant,
+      ),
+    );
   }
 
   Future<void> replaceTasks(List<Task> tasks) async {
     await updateTaskUseCase.repository.replaceTasks(tasks);
-    await notificationService.rescheduleTaskReminders(
-      tasks: tasks,
-      settings: settingsCubit.state.settings,
-    );
     await loadTasks();
+    await syncAllReminders();
   }
 
   Future<void> deleteTask(String id) async {
     await deleteTaskUseCase(id);
-    await notificationService.cancelTaskReminder(id);
+    await notificationService.cancelTaskAlerts(id);
     await loadTasks();
   }
 
   Future<void> toggleCompleted(String id) async {
     await toggleTaskCompletedUseCase(id);
-    final task = state.tasks.where((task) => task.id == id).firstOrNull;
-    if (task != null) {
-      if (task.isCompleted) {
-        await _syncReminder(task.copyWith(isCompleted: false));
-      } else {
-        await notificationService.cancelTaskReminder(id);
-      }
-    }
     await loadTasks();
+    final task = state.tasks.where((task) => task.id == id).firstOrNull;
+    if (task != null) await _syncAlerts(task);
   }
 
-  Future<void> syncAllReminders() async {
-    await notificationService.rescheduleTaskReminders(
+  Future<void> syncAllReminders() {
+    return notificationService.rescheduleAll(
       tasks: state.tasks,
-      settings: settingsCubit.state.settings,
+      enabled: _notificationsEnabled,
     );
   }
 
-  Future<void> _syncReminder(Task task) {
-    return notificationService.scheduleTaskReminder(
+  Future<void> _syncAlerts(Task task) {
+    return notificationService.scheduleTaskAlerts(
       task: task,
-      notificationsEnabled: settingsCubit.state.settings.notificationsEnabled,
+      enabled: _notificationsEnabled,
     );
   }
 
