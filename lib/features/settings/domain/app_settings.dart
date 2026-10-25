@@ -29,6 +29,28 @@ extension AppThemePresetX on AppThemePreset {
   };
 }
 
+/// Alert sounds bundled per platform: `assets/sounds/` (in-app preview),
+/// `android/app/src/main/res/raw/` and the iOS/macOS Runner bundles.
+enum NotificationSound { system, destello, logro, pulso, cristal, eco, mensaje }
+
+extension NotificationSoundX on NotificationSound {
+  String get label => switch (this) {
+    NotificationSound.system => 'Predeterminado del sistema',
+    NotificationSound.destello => 'Destello',
+    NotificationSound.logro => 'Logro',
+    NotificationSound.pulso => 'Pulso',
+    NotificationSound.cristal => 'Cristal',
+    NotificationSound.eco => 'Eco',
+    NotificationSound.mensaje => 'Mensaje',
+  };
+
+  /// Resource name without extension; null for the system sound.
+  String? get resource =>
+      this == NotificationSound.system ? null : 'priorix_$name';
+
+  String? get assetPath => resource == null ? null : 'sounds/$resource.wav';
+}
+
 class AppSettings extends Equatable {
   const AppSettings({
     this.themePreset = AppThemePreset.midnight,
@@ -38,6 +60,7 @@ class AppSettings extends Equatable {
     this.defaultNotifyAtDeadline = true,
     this.userName = '',
     this.onboardingCompleted = false,
+    this.notificationSound = NotificationSound.destello,
   });
 
   static const viewLabels = ['Inicio', 'Matriz', 'Agenda'];
@@ -49,6 +72,7 @@ class AppSettings extends Equatable {
   final bool defaultNotifyAtDeadline;
   final String userName;
   final bool onboardingCompleted;
+  final NotificationSound notificationSound;
 
   AppSettings copyWith({
     AppThemePreset? themePreset,
@@ -58,6 +82,7 @@ class AppSettings extends Equatable {
     bool? defaultNotifyAtDeadline,
     String? userName,
     bool? onboardingCompleted,
+    NotificationSound? notificationSound,
   }) {
     return AppSettings(
       themePreset: themePreset ?? this.themePreset,
@@ -69,6 +94,7 @@ class AppSettings extends Equatable {
           defaultNotifyAtDeadline ?? this.defaultNotifyAtDeadline,
       userName: userName ?? this.userName,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      notificationSound: notificationSound ?? this.notificationSound,
     );
   }
 
@@ -81,6 +107,7 @@ class AppSettings extends Equatable {
       'defaultNotifyAtDeadline': defaultNotifyAtDeadline,
       'userName': userName,
       'onboardingCompleted': onboardingCompleted,
+      'notificationSound': notificationSound.name,
     };
   }
 
@@ -102,6 +129,10 @@ class AppSettings extends Equatable {
       defaultNotifyAtDeadline: map['defaultNotifyAtDeadline'] as bool? ?? true,
       userName: map['userName'] as String? ?? '',
       onboardingCompleted: map['onboardingCompleted'] as bool? ?? false,
+      notificationSound: NotificationSound.values.firstWhere(
+        (sound) => sound.name == map['notificationSound'],
+        orElse: () => NotificationSound.destello,
+      ),
     );
   }
 
@@ -114,5 +145,6 @@ class AppSettings extends Equatable {
     defaultNotifyAtDeadline,
     userName,
     onboardingCompleted,
+    notificationSound,
   ];
 }

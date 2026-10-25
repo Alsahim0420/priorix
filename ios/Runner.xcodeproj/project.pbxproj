@@ -12,11 +12,17 @@
 		26BF6B1BB05C3BB8A538D40B /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9797847FD80A1BB70A67107A /* Pods_RunnerTests.framework */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		4FDD83E3EC6AC8BF09F77810 /* priorix_mensaje.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6D1C0BC30EB8729D6723E9B1 /* priorix_mensaje.wav */; };
+		71CAF1057C80EC48913C5C5C /* priorix_logro.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6D3D90402C04A9BFCBF28CEB /* priorix_logro.wav */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		870E958BD60EA12D8615CE22 /* priorix_destello.wav in Resources */ = {isa = PBXBuildFile; fileRef = A0046319094C0F137C29A517 /* priorix_destello.wav */; };
+		95EC7FA252DB6D56F72A6EC3 /* priorix_cristal.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C54AB4AA0EB143502A77041 /* priorix_cristal.wav */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		9966BB66FB0C855A6F4BC5F4 /* priorix_eco.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3A573810488F2D3CE43D00B1 /* priorix_eco.wav */; };
+		FB54331E78A2293F83A2036A /* priorix_pulso.wav in Resources */ = {isa = PBXBuildFile; fileRef = 708B29D4E24FECBCC7EC6DF6 /* priorix_pulso.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,8 +55,13 @@
 		17D82FC88345412A11607E46 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A573810488F2D3CE43D00B1 /* priorix_eco.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = priorix_eco.wav; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		3C54AB4AA0EB143502A77041 /* priorix_cristal.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = priorix_cristal.wav; sourceTree = "<group>"; };
 		5FF513534162940E2AC5246B /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		6D1C0BC30EB8729D6723E9B1 /* priorix_mensaje.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = priorix_mensaje.wav; sourceTree = "<group>"; };
+		6D3D90402C04A9BFCBF28CEB /* priorix_logro.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = priorix_logro.wav; sourceTree = "<group>"; };
+		708B29D4E24FECBCC7EC6DF6 /* priorix_pulso.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = priorix_pulso.wav; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
@@ -63,6 +74,7 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A0046319094C0F137C29A517 /* priorix_destello.wav */ = {isa = PBXFileReference; includeInIndex = 1; path = priorix_destello.wav; sourceTree = "<group>"; };
 		A8B82D4A3FA13B234E38F31D /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		C684B6D8E30902BBF1C15A04 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		F04A03DC1586D1FE2B8FC9F5 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -151,6 +163,12 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				3C54AB4AA0EB143502A77041 /* priorix_cristal.wav */,
+				A0046319094C0F137C29A517 /* priorix_destello.wav */,
+				3A573810488F2D3CE43D00B1 /* priorix_eco.wav */,
+				6D3D90402C04A9BFCBF28CEB /* priorix_logro.wav */,
+				6D1C0BC30EB8729D6723E9B1 /* priorix_mensaje.wav */,
+				708B29D4E24FECBCC7EC6DF6 /* priorix_pulso.wav */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -273,6 +291,12 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				95EC7FA252DB6D56F72A6EC3 /* priorix_cristal.wav in Resources */,
+				870E958BD60EA12D8615CE22 /* priorix_destello.wav in Resources */,
+				9966BB66FB0C855A6F4BC5F4 /* priorix_eco.wav in Resources */,
+				71CAF1057C80EC48913C5C5C /* priorix_logro.wav in Resources */,
+				4FDD83E3EC6AC8BF09F77810 /* priorix_mensaje.wav in Resources */,
+				FB54331E78A2293F83A2036A /* priorix_pulso.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

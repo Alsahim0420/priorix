@@ -18,6 +18,7 @@ import '../../data/models/task_model.dart';
 import '../cubit/task_cubit.dart';
 import '../task_actions.dart';
 import '../widgets/alert_threshold_picker.dart';
+import 'notification_sound_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -58,6 +59,16 @@ class SettingsPage extends StatelessWidget {
                     onTap: () => setNotifications(
                       context,
                       !settings.notificationsEnabled,
+                    ),
+                  ),
+                  _Tile(
+                    icon: Icons.music_note_outlined,
+                    title: 'Sonido',
+                    subtitle: settings.notificationSound.label,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationSoundPage(),
+                      ),
                     ),
                   ),
                   _Tile(
