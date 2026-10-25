@@ -26,7 +26,7 @@ class BackupService {
     required AppSettings settings,
   }) async {
     final payload = jsonEncode({
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
       'tasks': tasks.map((task) => task.toMap()).toList(),
       'categories': categories.map((category) => category.toMap()).toList(),
@@ -35,7 +35,7 @@ class BackupService {
     final name =
         'priorix-backup-${DateFormat('yyyyMMdd-HHmm').format(DateTime.now())}.json';
     final path = await FilePicker.platform.saveFile(
-      dialogTitle: 'Save Priorix backup',
+      dialogTitle: 'Guardar copia de Priorix',
       fileName: name,
       bytes: utf8.encode(payload),
     );
@@ -49,7 +49,7 @@ class BackupService {
 
   Future<PriorixBackup?> importBackup() async {
     final result = await FilePicker.platform.pickFiles(
-      dialogTitle: 'Choose Priorix backup',
+      dialogTitle: 'Elegir copia de Priorix',
       type: FileType.custom,
       allowedExtensions: ['json'],
       withData: true,

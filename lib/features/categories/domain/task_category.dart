@@ -32,7 +32,7 @@ class TaskCategory extends Equatable {
     return TaskCategory(
       name: (map['name'] as String? ?? '').trim(),
       iconKey: map['iconKey'] as String? ?? 'folder',
-      colorValue: map['colorValue'] as int? ?? AppColors.primaryGold.toARGB32(),
+      colorValue: map['colorValue'] as int? ?? AppColors.gold.toARGB32(),
     );
   }
 
@@ -59,16 +59,16 @@ class CategoryVisuals {
   };
 
   static const palette = <Color>[
-    AppColors.primaryGold,
-    AppColors.emerald,
-    AppColors.royalBlue,
-    Color(0xFFA78BFA),
-    Color(0xFFF472B6),
-    Color(0xFFFB7185),
-    Color(0xFFF59E0B),
-    Color(0xFF22C55E),
-    Color(0xFF38BDF8),
-    Color(0xFFE5E7EB),
+    AppColors.gold,
+    AppColors.jade,
+    AppColors.iris,
+    AppColors.violet,
+    AppColors.rose,
+    AppColors.ember,
+    AppColors.amber,
+    AppColors.success,
+    AppColors.sky,
+    AppColors.stone,
   ];
 
   static IconData iconFor(String key) => icons[key] ?? Icons.folder_rounded;

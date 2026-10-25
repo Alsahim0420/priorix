@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../tasks/domain/services/deadline_alert_planner.dart';
 import '../../data/notification_service.dart';
 import '../../data/settings_local_datasource.dart';
 import '../../domain/app_settings.dart';
@@ -13,9 +14,8 @@ class SettingsCubit extends Cubit<SettingsState> {
   final SettingsLocalDataSource localDataSource;
   final NotificationService notificationService;
 
-  Future<void> loadSettings() async {
-    final settings = localDataSource.getSettings();
-    emit(SettingsState(settings: settings));
+  void loadSettings() {
+    emit(SettingsState(settings: localDataSource.getSettings()));
   }
 
   Future<void> setTheme(AppThemePreset preset) {
@@ -26,17 +26,46 @@ class SettingsCubit extends Cubit<SettingsState> {
     return _save(state.settings.copyWith(defaultViewIndex: index));
   }
 
-  Future<void> setNotificationsEnabled(bool enabled) async {
+  Future<void> setUserName(String name) {
+    return _save(state.settings.copyWith(userName: name.trim()));
+  }
+
+  Future<void> completeOnboarding({String name = ''}) {
+    return _save(
+      state.settings.copyWith(userName: name.trim(), onboardingCompleted: true),
+    );
+  }
+
+  Future<void> setDefaultAlerts({
+    required List<int> thresholds,
+    required bool notifyAtDeadline,
+  }) {
+    return _save(
+      state.settings.copyWith(
+        defaultAlertThresholds: DeadlineAlertPlanner.normalize(thresholds),
+        defaultNotifyAtDeadline: notifyAtDeadline,
+      ),
+    );
+  }
+
+  /// Returns whether notifications ended up enabled.
+  Future<bool> setNotificationsEnabled(bool enabled) async {
     if (enabled) {
       final granted = await notificationService.requestPermissions();
       if (!granted) {
         emit(
-          state.copyWith(message: 'Notification permission was not granted.'),
+          state.copyWith(
+            message:
+                'Permiso denegado. Actívalo en los ajustes del sistema para recibir alertas.',
+          ),
         );
-        return;
+        // Clear it so the same message can be shown again next time.
+        emit(state.copyWith());
+        return false;
       }
     }
     await _save(state.settings.copyWith(notificationsEnabled: enabled));
+    return enabled;
   }
 
   Future<void> replaceSettings(AppSettings settings) async {

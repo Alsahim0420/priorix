@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
+/// Theme-independent brand colors. Surfaces and text live in [PriorixPalette].
 class AppColors {
   const AppColors._();
 
-  static const background = Color(0xFF070B14);
-  static const surface = Color(0xFF111827);
-  static const surfaceSecondary = Color(0xFF1F2937);
-  static const graphite = Color(0xCC151C2A);
-  static const primaryGold = Color(0xFFD6B56D);
-  static const goldDark = Color(0xFF9F7A32);
-  static const emerald = Color(0xFF2DD4BF);
-  static const royalBlue = Color(0xFF3B82F6);
-  static const textPrimary = Color(0xFFF8FAFC);
-  static const textSecondary = Color(0xFF94A3B8);
-  static const danger = Color(0xFFB91C1C);
-  static const success = Color(0xFF10B981);
-  static const border = Color(0x26FFFFFF);
+  // Eisenhower quadrants — mid-tones that read on both dark and light bases.
+  static const ember = Color(0xFFEB6A52);
+  static const jade = Color(0xFF3FAE8A);
+  static const iris = Color(0xFF7C8CF0);
+  static const stone = Color(0xFF8E8A96);
+
+  static const gold = Color(0xFFD8B677);
+  static const rose = Color(0xFFF07FA8);
+  static const amber = Color(0xFFF2A93B);
+  static const sky = Color(0xFF4FB3E8);
+  static const violet = Color(0xFFA98BF2);
+
+  static const danger = Color(0xFFE5484D);
+  static const success = Color(0xFF3DBE8B);
 }
