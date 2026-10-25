@@ -8,6 +8,7 @@ import '../../../app/theme/app_colors.dart';
 import '../../../core/extensions/date_extensions.dart';
 import '../../tasks/domain/entities/task.dart';
 import '../../tasks/domain/services/deadline_alert_planner.dart';
+import '../domain/app_settings.dart';
 
 class NotificationService {
   NotificationService();
@@ -20,33 +21,66 @@ class NotificationService {
   /// rendered from the brand mark (see test/brand_assets_test.dart).
   static const _androidIcon = 'ic_stat_priorix';
 
+  /// Outside the range produced by [_notificationId].
+  static const _testNotificationId = 0x7FFFFFF0;
+
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
   bool _ready = false;
 
-  static const _details = NotificationDetails(
-    android: AndroidNotificationDetails(
-      'priorix_deadlines',
-      'Vencimientos',
-      channelDescription: 'Avisos según el tiempo restante de tus tareas.',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: _androidIcon,
-      color: AppColors.gold,
-    ),
-    iOS: DarwinNotificationDetails(
+  /// Android fixes a channel's sound when it is first created, so each sound
+  /// gets its own channel; the pre-sound `priorix_deadlines` one is dropped.
+  static const _legacyChannelId = 'priorix_deadlines';
+  static String _channelId(NotificationSound sound) =>
+      '${_legacyChannelId}_${sound.name}';
+
+  NotificationSound _sound = NotificationSound.destello;
+
+  NotificationDetails get _details {
+    final resource = _sound.resource;
+    final darwin = DarwinNotificationDetails(
       presentAlert: true,
       presentBanner: true,
       presentList: true,
       presentSound: true,
-    ),
-    macOS: DarwinNotificationDetails(
-      presentAlert: true,
-      presentBanner: true,
-      presentList: true,
-      presentSound: true,
-    ),
-  );
+      sound: resource == null ? null : '$resource.wav',
+    );
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        _channelId(_sound),
+        'Vencimientos · ${_sound.label}',
+        channelDescription: 'Avisos según el tiempo restante de tus tareas.',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: _androidIcon,
+        color: AppColors.gold,
+        playSound: true,
+        sound: resource == null
+            ? null
+            : RawResourceAndroidNotificationSound(resource),
+      ),
+      iOS: darwin,
+      macOS: darwin,
+    );
+  }
+
+  /// Applies to alerts scheduled from now on; callers reschedule existing ones.
+  Future<void> setSound(NotificationSound sound) async {
+    _sound = sound;
+    if (!_ready) return;
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return;
+    for (final id in [
+      _legacyChannelId,
+      for (final other in NotificationSound.values)
+        if (other != sound) _channelId(other),
+    ]) {
+      await android.deleteNotificationChannel(id);
+    }
+  }
 
   Future<void> initialize() async {
     if (kIsWeb || Platform.isLinux || Platform.isWindows) return;
@@ -97,6 +131,17 @@ class NotificationService {
     );
 
     return androidGranted ?? iosGranted ?? macGranted ?? true;
+  }
+
+  /// Fires one alert right away with the current sound.
+  Future<void> showTest() async {
+    if (!_ready) return;
+    await _plugin.show(
+      _testNotificationId,
+      'Priorix',
+      'Así sonarán tus alertas · ${_sound.label}',
+      _details,
+    );
   }
 
   Future<void> scheduleTaskAlerts({

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../tasks/domain/services/deadline_alert_planner.dart';
 import '../../data/notification_service.dart';
@@ -15,7 +16,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   final NotificationService notificationService;
 
   void loadSettings() {
-    emit(SettingsState(settings: localDataSource.getSettings()));
+    final settings = localDataSource.getSettings();
+    // The sound is applied synchronously; only Android channel cleanup awaits.
+    unawaited(notificationService.setSound(settings.notificationSound));
+    emit(SettingsState(settings: settings));
   }
 
   Future<void> setTheme(AppThemePreset preset) {
@@ -25,6 +29,13 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> setDefaultView(int index) {
     return _save(state.settings.copyWith(defaultViewIndex: index));
   }
+
+  /// Callers reschedule pending alerts so they pick up the new sound.
+  Future<void> setNotificationSound(NotificationSound sound) {
+    return _save(state.settings.copyWith(notificationSound: sound));
+  }
+
+  Future<void> sendTestNotification() => notificationService.showTest();
 
   Future<void> setUserName(String name) {
     return _save(state.settings.copyWith(userName: name.trim()));
@@ -74,6 +85,9 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> _save(AppSettings settings) async {
     await localDataSource.saveSettings(settings);
+    if (settings.notificationSound != state.settings.notificationSound) {
+      await notificationService.setSound(settings.notificationSound);
+    }
     emit(SettingsState(settings: settings));
   }
 }

@@ -22,6 +22,7 @@ dependencies:
   path_provider: ^2.1.5
   timezone: ^0.10.1
   flutter_timezone: ^4.0.1
+  audioplayers: ^6.8.1
 
 dev_dependencies:
   flutter_test:
@@ -32,6 +33,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Preview copies of the alert sounds; the copies notifications actually play
+  # live in android/app/src/main/res/raw/ and ios|macos/Runner/.
+  assets:
+    - assets/sounds/
 
 # Brand PNGs are rendered from lib/core/widgets/priorix_mark.dart by
 # test/brand_assets_test.dart (run with --update-goldens).
