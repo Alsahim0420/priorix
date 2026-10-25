@@ -1,4 +1,4 @@
-package com.example.priorix
+package com.pablo.priorix
 
 import io.flutter.embedding.android.FlutterActivity
 

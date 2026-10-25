@@ -260,7 +260,7 @@ class SettingsPage extends StatelessWidget {
     showAboutDialog(
       context: context,
       applicationName: 'Priorix',
-      applicationVersion: '1.0.0',
+      applicationVersion: '1.0.1',
       applicationLegalese: 'Decide qué importa primero.',
       children: const [
         SizedBox(height: 12),
