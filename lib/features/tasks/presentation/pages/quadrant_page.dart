@@ -36,66 +36,58 @@ class QuadrantPage extends StatelessWidget {
                 });
               final completed = tasks.where((task) => task.isCompleted);
 
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 680),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          CircleIconButton(
-                            icon: Icons.arrow_back_rounded,
-                            tooltip: 'Volver',
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
+                      CircleIconButton(
+                        icon: Icons.arrow_back_rounded,
+                        tooltip: 'Volver',
+                        onPressed: () => Navigator.pop(context),
                       ),
-                      const SizedBox(height: 28),
-                      Row(children: [QuadrantBadge(quadrant: quadrant)]),
-                      const SizedBox(height: 14),
-                      Text(
-                        quadrant.subtitle,
-                        style: context.text.headlineMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(quadrant.guidance, style: context.text.bodyMedium),
-                      const SizedBox(height: 20),
-                      PButton(
-                        label: 'Añadir a ${quadrant.title}',
-                        icon: Icons.add_rounded,
-                        variant: PButtonVariant.secondary,
-                        onPressed: () =>
-                            openTaskEditor(context, initialQuadrant: quadrant),
-                      ),
-                      const SizedBox(height: 32),
-                      SectionLabel('Pendientes · ${pending.length}'),
-                      const SizedBox(height: 12),
-                      if (pending.isEmpty)
-                        EmptyState(
-                          icon: quadrant.icon,
-                          title: 'Nada pendiente aquí',
-                          message: 'Este cuadrante está despejado.',
-                        )
-                      else
-                        for (final task in pending)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: TaskTile(task: task, showQuadrant: false),
-                          ),
-                      if (completed.isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        SectionLabel('Completadas · ${completed.length}'),
-                        const SizedBox(height: 12),
-                        for (final task in completed)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: TaskTile(task: task, showQuadrant: false),
-                          ),
-                      ],
                     ],
                   ),
-                ),
+                  const SizedBox(height: 28),
+                  Row(children: [QuadrantBadge(quadrant: quadrant)]),
+                  const SizedBox(height: 14),
+                  Text(quadrant.subtitle, style: context.text.headlineMedium),
+                  const SizedBox(height: 8),
+                  Text(quadrant.guidance, style: context.text.bodyMedium),
+                  const SizedBox(height: 20),
+                  PButton(
+                    label: 'Añadir a ${quadrant.title}',
+                    icon: Icons.add_rounded,
+                    variant: PButtonVariant.secondary,
+                    onPressed: () =>
+                        openTaskEditor(context, initialQuadrant: quadrant),
+                  ),
+                  const SizedBox(height: 32),
+                  SectionLabel('Pendientes · ${pending.length}'),
+                  const SizedBox(height: 12),
+                  if (pending.isEmpty)
+                    EmptyState(
+                      icon: quadrant.icon,
+                      title: 'Nada pendiente aquí',
+                      message: 'Este cuadrante está despejado.',
+                    )
+                  else
+                    for (final task in pending)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: TaskTile(task: task, showQuadrant: false),
+                      ),
+                  if (completed.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    SectionLabel('Completadas · ${completed.length}'),
+                    const SizedBox(height: 12),
+                    for (final task in completed)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: TaskTile(task: task, showQuadrant: false),
+                      ),
+                  ],
+                ],
               );
             },
           ),

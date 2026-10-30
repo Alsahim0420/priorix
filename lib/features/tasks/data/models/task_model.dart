@@ -16,6 +16,7 @@ class TaskModel extends Task {
     required super.updatedAt,
     super.alertThresholds,
     super.notifyAtDeadline,
+    super.links,
   });
 
   factory TaskModel.fromEntity(Task task) => TaskModel(
@@ -32,6 +33,7 @@ class TaskModel extends Task {
     updatedAt: task.updatedAt,
     alertThresholds: task.alertThresholds,
     notifyAtDeadline: task.notifyAtDeadline,
+    links: task.links,
   );
 
   Map<String, dynamic> toMap() {
@@ -49,6 +51,7 @@ class TaskModel extends Task {
       'updatedAt': updatedAt.toIso8601String(),
       'alertThresholds': alertThresholds,
       'notifyAtDeadline': notifyAtDeadline,
+      'links': links,
     };
   }
 
@@ -73,6 +76,7 @@ class TaskModel extends Task {
       updatedAt: DateTime.parse(map['updatedAt'] as String),
       alertThresholds: _intList(map['alertThresholds']),
       notifyAtDeadline: map['notifyAtDeadline'] as bool? ?? !legacy,
+      links: _stringList(map['links']),
     );
   }
 
@@ -88,6 +92,11 @@ class TaskModel extends Task {
   static List<int> _intList(dynamic value) {
     if (value is! List) return const [];
     return value.whereType<num>().map((v) => v.toInt()).toList();
+  }
+
+  static List<String> _stringList(dynamic value) {
+    if (value is! List) return const [];
+    return value.whereType<String>().toList();
   }
 }
 
@@ -118,13 +127,14 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       updatedAt: fields[9] as DateTime,
       alertThresholds: TaskModel._intList(fields[11]),
       notifyAtDeadline: fields[12] as bool? ?? !legacy,
+      links: TaskModel._stringList(fields[13]),
     );
   }
 
   @override
   void write(BinaryWriter writer, TaskModel obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -150,6 +160,8 @@ class TaskModelAdapter extends TypeAdapter<TaskModel> {
       ..writeByte(11)
       ..write(obj.alertThresholds)
       ..writeByte(12)
-      ..write(obj.notifyAtDeadline);
+      ..write(obj.notifyAtDeadline)
+      ..writeByte(13)
+      ..write(obj.links);
   }
 }

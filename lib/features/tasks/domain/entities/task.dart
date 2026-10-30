@@ -74,6 +74,7 @@ class Task extends Equatable {
     required this.updatedAt,
     this.alertThresholds = const [],
     this.notifyAtDeadline = true,
+    this.links = const [],
   });
 
   final String id;
@@ -96,6 +97,9 @@ class Task extends Equatable {
   /// which to notify, e.g. `[50, 20]`.
   final List<int> alertThresholds;
   final bool notifyAtDeadline;
+
+  /// URLs of related Notes, Freeform boards or web pages.
+  final List<String> links;
 
   TaskQuadrant get quadrant =>
       TaskQuadrantX.from(urgent: isUrgent, important: isImportant);
@@ -127,6 +131,7 @@ class Task extends Equatable {
     DateTime? updatedAt,
     List<int>? alertThresholds,
     bool? notifyAtDeadline,
+    List<String>? links,
     bool clearDescription = false,
     bool clearDueDate = false,
     bool clearReminder = false,
@@ -146,6 +151,7 @@ class Task extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       alertThresholds: alertThresholds ?? this.alertThresholds,
       notifyAtDeadline: notifyAtDeadline ?? this.notifyAtDeadline,
+      links: links ?? this.links,
     );
   }
 
@@ -164,5 +170,6 @@ class Task extends Equatable {
     updatedAt,
     alertThresholds,
     notifyAtDeadline,
+    links,
   ];
 }

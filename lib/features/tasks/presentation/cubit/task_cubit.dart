@@ -57,6 +57,7 @@ class TaskCubit extends Cubit<TaskState> {
     required bool isImportant,
     List<int> alertThresholds = const [],
     bool notifyAtDeadline = true,
+    List<String> links = const [],
     DateTime? createdAt,
   }) async {
     final now = DateTime.now();
@@ -74,6 +75,7 @@ class TaskCubit extends Cubit<TaskState> {
       updatedAt: now,
       alertThresholds: DeadlineAlertPlanner.normalize(alertThresholds),
       notifyAtDeadline: notifyAtDeadline,
+      links: links,
     );
     await createTaskUseCase(task);
     await _syncAlerts(task);

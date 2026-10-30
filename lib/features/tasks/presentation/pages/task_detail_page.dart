@@ -19,6 +19,7 @@ import '../cubit/task_cubit.dart';
 import '../cubit/task_state.dart';
 import '../task_actions.dart';
 import '../widgets/alert_timeline.dart';
+import '../widgets/task_links.dart';
 import 'task_editor_page.dart';
 
 class TaskDetailPage extends StatelessWidget {
@@ -66,165 +67,158 @@ class _DetailView extends StatelessWidget {
     return Scaffold(
       body: PremiumBackground(
         child: SafeArea(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 680),
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      CircleIconButton(
-                        icon: Icons.arrow_back_rounded,
-                        tooltip: 'Volver',
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Spacer(),
-                      CircleIconButton(
-                        icon: Icons.edit_outlined,
-                        tooltip: 'Editar',
-                        onPressed: () => openTaskEditor(context, task: task),
-                      ),
-                      const SizedBox(width: 10),
-                      CircleIconButton(
-                        icon: Icons.delete_outline_rounded,
-                        tooltip: 'Eliminar',
-                        color: AppColors.danger,
-                        onPressed: () => _delete(context),
-                      ),
-                    ],
+                  CircleIconButton(
+                    icon: Icons.arrow_back_rounded,
+                    tooltip: 'Volver',
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  const SizedBox(height: 28),
-                  Row(children: [QuadrantBadge(quadrant: task.quadrant)]),
-                  const SizedBox(height: 14),
-                  Text(
-                    task.title,
-                    style: context.text.headlineMedium?.copyWith(
-                      decoration: task.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                      decorationColor: p.textTertiary,
-                      color: task.isCompleted ? p.textSecondary : null,
-                    ),
+                  const Spacer(),
+                  CircleIconButton(
+                    icon: Icons.edit_outlined,
+                    tooltip: 'Editar',
+                    onPressed: () => openTaskEditor(context, task: task),
                   ),
-                  if ((task.description ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      task.description!,
-                      style: context.text.bodyLarge?.copyWith(
-                        color: p.textSecondary,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 28),
-                  _CountdownCard(task: task, now: now),
-                  const SizedBox(height: 14),
-                  if (alerts.isNotEmpty)
-                    SurfaceCard(
-                      padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Alertas',
-                                  style: context.text.titleMedium,
-                                ),
-                              ),
-                              if (!notificationsOn)
-                                GestureDetector(
-                                  onTap: () => setNotifications(context, true),
-                                  child: Text(
-                                    'Activar notificaciones',
-                                    style: context.text.labelMedium?.copyWith(
-                                      color: p.accent,
-                                    ),
-                                  ),
-                                )
-                              else if (task.isCompleted)
-                                Text(
-                                  'En pausa',
-                                  style: context.text.labelMedium,
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          AlertTimeline(
-                            alerts: alerts,
-                            now: now,
-                            muted: !notificationsOn || task.isCompleted,
-                          ),
-                        ],
-                      ),
-                    )
-                  else if (task.dueDate != null)
-                    SurfaceCard(
-                      onTap: () => openTaskEditor(context, task: task),
-                      padding: const EdgeInsets.all(18),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.notifications_none_rounded,
-                            color: p.textTertiary,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Sin alertas. Añade avisos al 50 %, 20 %…',
-                              style: context.text.bodyMedium,
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: p.textTertiary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 14),
-                  _InfoCard(task: task),
-                  const SizedBox(height: 28),
-                  const SectionLabel('Mover a'),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      for (final quadrant in TaskQuadrant.values) ...[
-                        Expanded(
-                          child: _MoveChip(
-                            quadrant: quadrant,
-                            current: quadrant == task.quadrant,
-                            onTap: () {
-                              HapticFeedback.selectionClick();
-                              context.read<TaskCubit>().moveToQuadrant(
-                                task,
-                                quadrant,
-                              );
-                            },
-                          ),
-                        ),
-                        if (quadrant != TaskQuadrant.values.last)
-                          const SizedBox(width: 8),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 32),
-                  PButton(
-                    label: task.isCompleted
-                        ? 'Reabrir tarea'
-                        : 'Marcar como completada',
-                    icon: task.isCompleted
-                        ? Icons.replay_rounded
-                        : Icons.check_rounded,
-                    variant: task.isCompleted
-                        ? PButtonVariant.secondary
-                        : PButtonVariant.primary,
-                    onPressed: () => toggleTaskCompleted(context, task),
+                  const SizedBox(width: 10),
+                  CircleIconButton(
+                    icon: Icons.delete_outline_rounded,
+                    tooltip: 'Eliminar',
+                    color: AppColors.danger,
+                    onPressed: () => _delete(context),
                   ),
                 ],
               ),
-            ),
+              const SizedBox(height: 28),
+              Row(children: [QuadrantBadge(quadrant: task.quadrant)]),
+              const SizedBox(height: 14),
+              Text(
+                task.title,
+                style: context.text.headlineMedium?.copyWith(
+                  decoration: task.isCompleted
+                      ? TextDecoration.lineThrough
+                      : null,
+                  decorationColor: p.textTertiary,
+                  color: task.isCompleted ? p.textSecondary : null,
+                ),
+              ),
+              if ((task.description ?? '').isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(
+                  task.description!,
+                  style: context.text.bodyLarge?.copyWith(
+                    color: p.textSecondary,
+                  ),
+                ),
+              ],
+              if (task.links.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                TaskLinkList(links: task.links),
+              ],
+              const SizedBox(height: 28),
+              _CountdownCard(task: task, now: now),
+              const SizedBox(height: 14),
+              if (alerts.isNotEmpty)
+                SurfaceCard(
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Alertas',
+                              style: context.text.titleMedium,
+                            ),
+                          ),
+                          if (!notificationsOn)
+                            GestureDetector(
+                              onTap: () => setNotifications(context, true),
+                              child: Text(
+                                'Activar notificaciones',
+                                style: context.text.labelMedium?.copyWith(
+                                  color: p.accent,
+                                ),
+                              ),
+                            )
+                          else if (task.isCompleted)
+                            Text('En pausa', style: context.text.labelMedium),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      AlertTimeline(
+                        alerts: alerts,
+                        now: now,
+                        muted: !notificationsOn || task.isCompleted,
+                      ),
+                    ],
+                  ),
+                )
+              else if (task.dueDate != null)
+                SurfaceCard(
+                  onTap: () => openTaskEditor(context, task: task),
+                  padding: const EdgeInsets.all(18),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.notifications_none_rounded,
+                        color: p.textTertiary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Sin alertas. Añade avisos al 50 %, 20 %…',
+                          style: context.text.bodyMedium,
+                        ),
+                      ),
+                      Icon(Icons.chevron_right_rounded, color: p.textTertiary),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 14),
+              _InfoCard(task: task),
+              const SizedBox(height: 28),
+              const SectionLabel('Mover a'),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  for (final quadrant in TaskQuadrant.values) ...[
+                    Expanded(
+                      child: _MoveChip(
+                        quadrant: quadrant,
+                        current: quadrant == task.quadrant,
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          context.read<TaskCubit>().moveToQuadrant(
+                            task,
+                            quadrant,
+                          );
+                        },
+                      ),
+                    ),
+                    if (quadrant != TaskQuadrant.values.last)
+                      const SizedBox(width: 8),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 32),
+              PButton(
+                label: task.isCompleted
+                    ? 'Reabrir tarea'
+                    : 'Marcar como completada',
+                icon: task.isCompleted
+                    ? Icons.replay_rounded
+                    : Icons.check_rounded,
+                variant: task.isCompleted
+                    ? PButtonVariant.secondary
+                    : PButtonVariant.primary,
+                onPressed: () => toggleTaskCompleted(context, task),
+              ),
+            ],
           ),
         ),
       ),

@@ -51,15 +51,7 @@ class PageFrame extends StatelessWidget {
         child: list,
       );
     }
-    return SafeArea(
-      bottom: false,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 760),
-          child: list,
-        ),
-      ),
-    );
+    return SafeArea(bottom: false, child: list);
   }
 }
 

@@ -56,19 +56,19 @@ void main() {
     await dir.delete(recursive: true);
   });
 
-  for (final preset in [
-    AppThemePreset.midnight,
-    AppThemePreset.porcelainLight,
+  for (final (preset, device, size) in [
+    (AppThemePreset.midnight, 'phone', const Size(390, 844)),
+    (AppThemePreset.porcelainLight, 'phone', const Size(390, 844)),
+    (AppThemePreset.midnight, 'iPad landscape', const Size(1194, 834)),
   ]) {
-    testWidgets('every screen renders without errors (${preset.name})', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
-      tester.view.devicePixelRatio = 3;
+    testWidgets('every screen renders without errors '
+        '(${preset.name}, $device)', (tester) async {
+      tester.view.physicalSize = size * 2;
+      tester.view.devicePixelRatio = 2;
       addTearDown(tester.view.reset);
 
       final box = await tester.runAsync(
-        () => Hive.openBox<dynamic>('settings_${preset.name}'),
+        () => Hive.openBox<dynamic>('settings_${preset.name}_${size.width}'),
       );
       final settingsData = SettingsLocalDataSource(box!);
       await tester.runAsync(
@@ -101,6 +101,7 @@ void main() {
       await tester.runAsync(() async {
         await tasks.createTask(
           title: 'Preparar propuesta para el comité de dirección',
+          links: ['https://www.icloud.com/notes/0abc#Cifras_comité'],
           description: 'Revisar números con finanzas',
           category: 'Trabajo',
           isUrgent: true,
@@ -115,6 +116,10 @@ void main() {
           isImportant: true,
           dueDate: now.add(const Duration(days: 3)),
           alertThresholds: [75, 50, 25, 10],
+          links: [
+            'https://www.icloud.com/freeform/0xyz#Roadmap_Q4',
+            'https://www.icloud.com/notes/0abc#Ideas',
+          ],
         );
         await tasks.createTask(
           title: 'Responder correos',
@@ -146,10 +151,16 @@ void main() {
       }
 
       // Task detail.
+      await tester.scrollUntilVisible(
+        find.text('Plan trimestral'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       await tester.tap(find.text('Plan trimestral').first);
       await tester.pumpAndSettle();
       expect(find.text('Alertas'), findsOneWidget);
       expect(find.text('Queda el 50 %'), findsOneWidget);
+      expect(find.text('Roadmap Q4'), findsOneWidget);
 
       // Editor from detail.
       await tester.tap(find.byTooltip('Editar'));

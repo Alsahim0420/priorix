@@ -20,6 +20,7 @@ import '../task_actions.dart';
 import '../widgets/alert_threshold_picker.dart';
 import '../widgets/alert_timeline.dart';
 import '../widgets/quadrant_selector.dart';
+import '../widgets/task_links.dart';
 
 class TaskEditorPage extends StatefulWidget {
   const TaskEditorPage({super.key, this.task, this.initialQuadrant});
@@ -40,6 +41,7 @@ class _TaskEditorPageState extends State<TaskEditorPage> {
   DateTime? _reminderAt;
   late List<int> _thresholds;
   late bool _notifyAtDeadline;
+  late List<String> _links;
   late final DateTime _start;
   bool _saving = false;
 
@@ -59,6 +61,7 @@ class _TaskEditorPageState extends State<TaskEditorPage> {
     _thresholds = task?.alertThresholds ?? settings.defaultAlertThresholds;
     _notifyAtDeadline =
         task?.notifyAtDeadline ?? settings.defaultNotifyAtDeadline;
+    _links = [...?task?.links];
     _start = task?.createdAt ?? DateTime.now();
   }
 
@@ -113,126 +116,131 @@ class _TaskEditorPageState extends State<TaskEditorPage> {
                 ),
               ),
               Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 680),
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      children: [
-                        TextField(
-                          controller: _title,
-                          autofocus: !_isEditing,
-                          maxLines: null,
-                          textCapitalization: TextCapitalization.sentences,
-                          style: context.text.headlineSmall,
-                          decoration: _bare('¿Qué hay que hacer?'),
-                        ),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _description,
-                          minLines: 1,
-                          maxLines: 6,
-                          textCapitalization: TextCapitalization.sentences,
-                          style: context.text.bodyLarge?.copyWith(
-                            color: p.textSecondary,
-                          ),
-                          decoration: _bare(
-                            'Añade contexto o el siguiente paso…',
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        const SectionLabel('Cuadrante'),
-                        const SizedBox(height: 12),
-                        QuadrantSelector(
-                          value: _quadrant,
-                          onChanged: (value) =>
-                              setState(() => _quadrant = value),
-                        ),
-                        const SizedBox(height: 32),
-                        const SectionLabel('Categoría'),
-                        const SizedBox(height: 12),
-                        _CategoryChips(
-                          value: _category,
-                          onChanged: (value) =>
-                              setState(() => _category = value),
-                        ),
-                        const SizedBox(height: 32),
-                        const SectionLabel('Fecha límite'),
-                        const SizedBox(height: 12),
-                        _DeadlineField(
-                          value: _deadline,
-                          now: now,
-                          onPick: _pickDeadline,
-                          onQuickPick: (value) {
-                            HapticFeedback.selectionClick();
-                            setState(() => _deadline = value);
-                          },
-                          onClear: () => setState(() => _deadline = null),
-                        ),
-                        const SizedBox(height: 32),
-                        const SectionLabel('Alertas inteligentes'),
-                        const SizedBox(height: 12),
-                        if (_deadline == null)
-                          _Hint(
-                            icon: Icons.hourglass_empty_rounded,
-                            text:
-                                'Define una fecha límite y Priorix te avisará cuando quede el porcentaje de tiempo que elijas.',
-                          )
-                        else ...[
-                          if (!notificationsOn) ...[
-                            _NotificationsOffBanner(
-                              onEnable: () => setNotifications(context, true),
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                          AlertThresholdPicker(
-                            values: _thresholds,
-                            onChanged: (value) =>
-                                setState(() => _thresholds = value),
-                          ),
-                          const SizedBox(height: 16),
-                          _SwitchRow(
-                            icon: Icons.flag_rounded,
-                            title: 'Avisar al vencer',
-                            subtitle: 'Una alerta en el momento exacto.',
-                            value: _notifyAtDeadline,
-                            onChanged: (value) =>
-                                setState(() => _notifyAtDeadline = value),
-                          ),
-                          const SizedBox(height: 16),
-                          _AlertPreview(
-                            start: _start,
-                            deadline: _deadline!,
-                            thresholds: _thresholds,
-                            notifyAtDeadline: _notifyAtDeadline,
-                            reminderAt: _reminderAt,
-                            now: now,
-                            muted: !notificationsOn,
-                          ),
-                        ],
-                        const SizedBox(height: 32),
-                        const SectionLabel('Recordatorio puntual'),
-                        const SizedBox(height: 12),
-                        _ReminderField(
-                          value: _reminderAt,
-                          now: now,
-                          onPick: _pickReminder,
-                          onClear: () => setState(() => _reminderAt = null),
-                        ),
-                        if (_isEditing) ...[
-                          const SizedBox(height: 40),
-                          PButton(
-                            label: 'Eliminar tarea',
-                            icon: Icons.delete_outline_rounded,
-                            variant: PButtonVariant.danger,
-                            onPressed: _delete,
-                          ),
-                        ],
-                      ],
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  children: [
+                    TextField(
+                      controller: _title,
+                      autofocus: !_isEditing,
+                      maxLines: null,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: context.text.headlineSmall,
+                      decoration: _bare('¿Qué hay que hacer?'),
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: _description,
+                      minLines: 1,
+                      maxLines: 6,
+                      textCapitalization: TextCapitalization.sentences,
+                      style: context.text.bodyLarge?.copyWith(
+                        color: p.textSecondary,
+                      ),
+                      decoration: _bare('Añade contexto o el siguiente paso…'),
+                    ),
+                    const SizedBox(height: 32),
+                    const SectionLabel('Cuadrante'),
+                    const SizedBox(height: 12),
+                    QuadrantSelector(
+                      value: _quadrant,
+                      onChanged: (value) => setState(() => _quadrant = value),
+                    ),
+                    const SizedBox(height: 32),
+                    const SectionLabel('Categoría'),
+                    const SizedBox(height: 12),
+                    _CategoryChips(
+                      value: _category,
+                      onChanged: (value) => setState(() => _category = value),
+                    ),
+                    const SizedBox(height: 32),
+                    const SectionLabel('Fecha límite'),
+                    const SizedBox(height: 12),
+                    _DeadlineField(
+                      value: _deadline,
+                      now: now,
+                      onPick: _pickDeadline,
+                      onQuickPick: (value) {
+                        HapticFeedback.selectionClick();
+                        setState(() => _deadline = value);
+                      },
+                      onClear: () => setState(() => _deadline = null),
+                    ),
+                    const SizedBox(height: 32),
+                    const SectionLabel('Alertas inteligentes'),
+                    const SizedBox(height: 12),
+                    if (_deadline == null)
+                      _Hint(
+                        icon: Icons.hourglass_empty_rounded,
+                        text:
+                            'Define una fecha límite y Priorix te avisará cuando quede el porcentaje de tiempo que elijas.',
+                      )
+                    else ...[
+                      if (!notificationsOn) ...[
+                        _NotificationsOffBanner(
+                          onEnable: () => setNotifications(context, true),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      AlertThresholdPicker(
+                        values: _thresholds,
+                        onChanged: (value) =>
+                            setState(() => _thresholds = value),
+                      ),
+                      const SizedBox(height: 16),
+                      _SwitchRow(
+                        icon: Icons.flag_rounded,
+                        title: 'Avisar al vencer',
+                        subtitle: 'Una alerta en el momento exacto.',
+                        value: _notifyAtDeadline,
+                        onChanged: (value) =>
+                            setState(() => _notifyAtDeadline = value),
+                      ),
+                      const SizedBox(height: 16),
+                      _AlertPreview(
+                        start: _start,
+                        deadline: _deadline!,
+                        thresholds: _thresholds,
+                        notifyAtDeadline: _notifyAtDeadline,
+                        reminderAt: _reminderAt,
+                        now: now,
+                        muted: !notificationsOn,
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                    const SectionLabel('Recordatorio puntual'),
+                    const SizedBox(height: 12),
+                    _ReminderField(
+                      value: _reminderAt,
+                      now: now,
+                      onPick: _pickReminder,
+                      onClear: () => setState(() => _reminderAt = null),
+                    ),
+                    const SizedBox(height: 32),
+                    const SectionLabel('Notas y tableros'),
+                    const SizedBox(height: 12),
+                    if (_links.isNotEmpty) ...[
+                      TaskLinkList(
+                        links: _links,
+                        onRemove: (url) => setState(() => _links.remove(url)),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    TaskLinkComposer(
+                      existing: _links,
+                      onAdd: (url) => setState(() => _links.add(url)),
+                    ),
+                    if (_isEditing) ...[
+                      const SizedBox(height: 40),
+                      PButton(
+                        label: 'Eliminar tarea',
+                        icon: Icons.delete_outline_rounded,
+                        variant: PButtonVariant.danger,
+                        onPressed: _delete,
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
@@ -312,6 +320,7 @@ class _TaskEditorPageState extends State<TaskEditorPage> {
         isImportant: _quadrant.isImportant,
         alertThresholds: _thresholds,
         notifyAtDeadline: _notifyAtDeadline,
+        links: _links,
         createdAt: _start,
       );
     } else {
@@ -326,6 +335,7 @@ class _TaskEditorPageState extends State<TaskEditorPage> {
           isImportant: _quadrant.isImportant,
           alertThresholds: _thresholds,
           notifyAtDeadline: _notifyAtDeadline,
+          links: _links,
           clearDescription: description.isEmpty,
           clearCategory: _category == null,
           clearDueDate: _deadline == null,

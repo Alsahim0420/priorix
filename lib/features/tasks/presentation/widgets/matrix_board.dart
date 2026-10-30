@@ -10,6 +10,7 @@ import '../../../../core/widgets/time_visuals.dart';
 import '../../domain/entities/task.dart';
 import '../cubit/task_cubit.dart';
 import '../task_actions.dart';
+import 'task_links.dart';
 
 /// Full Eisenhower board. Long-press a task to drag it into another quadrant.
 class MatrixBoard extends StatelessWidget {
@@ -291,6 +292,10 @@ class _MiniTaskCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: context.text.titleSmall?.copyWith(fontSize: 13),
           ),
+          if (task.links.isNotEmpty && !lifted) ...[
+            const SizedBox(height: 6),
+            TaskLinkButton(links: task.links, dense: true),
+          ],
           if (due != null) ...[
             const SizedBox(height: 4),
             Text(

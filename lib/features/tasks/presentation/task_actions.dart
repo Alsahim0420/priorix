@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../settings/presentation/cubit/settings_cubit.dart';
 import '../domain/entities/task.dart';
 import 'cubit/task_cubit.dart';
@@ -48,4 +49,23 @@ Future<void> setNotifications(BuildContext context, bool enabled) async {
   final taskCubit = context.read<TaskCubit>();
   await context.read<SettingsCubit>().setNotificationsEnabled(enabled);
   await taskCubit.syncAllReminders();
+}
+
+/// Opens a task link in its own app (Notes, Freeform, browser…).
+Future<void> openTaskLink(BuildContext context, String url) async {
+  final messenger = ScaffoldMessenger.of(context);
+  final uri = Uri.tryParse(url);
+  var opened = false;
+  if (uri != null) {
+    try {
+      opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } on PlatformException {
+      opened = false;
+    }
+  }
+  if (!opened) {
+    messenger.showSnackBar(
+      const SnackBar(content: Text('No se pudo abrir el enlace.')),
+    );
+  }
 }

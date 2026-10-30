@@ -71,75 +71,69 @@ class _NotificationSoundPageState extends State<NotificationSoundPage> {
             builder: (context, state) {
               final settings = state.settings;
               final sounds = NotificationSound.values;
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 680),
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          CircleIconButton(
-                            icon: Icons.arrow_back_rounded,
-                            tooltip: 'Volver',
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      const PageHeader(
-                        overline: 'Notificaciones',
-                        title: 'Sonido de alerta',
-                        subtitle:
-                            'Toca un sonido para escucharlo. Se aplica a todas tus alertas.',
-                      ),
-                      const SizedBox(height: 24),
-                      SurfaceCard(
-                        padding: EdgeInsets.zero,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Column(
-                            children: [
-                              for (var i = 0; i < sounds.length; i++) ...[
-                                _SoundTile(
-                                  sound: sounds[i],
-                                  selected:
-                                      sounds[i] == settings.notificationSound,
-                                  playing: sounds[i] == _playing,
-                                  onTap: () => _select(sounds[i]),
-                                ),
-                                if (i != sounds.length - 1)
-                                  const Divider(indent: 66, endIndent: 0),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      PButton(
-                        label: 'Probar notificación',
-                        icon: Icons.notifications_active_outlined,
-                        variant: PButtonVariant.secondary,
-                        onPressed: settings.notificationsEnabled
-                            ? () => context
-                                  .read<SettingsCubit>()
-                                  .sendTestNotification()
-                            : null,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(6, 10, 6, 0),
-                        child: Text(
-                          settings.notificationsEnabled
-                              ? 'Envía una alerta real ahora para oírla como llegará. Si el dispositivo está en silencio no sonará.'
-                              : 'Activa las alertas de vencimiento para enviar una prueba.',
-                          style: context.text.bodySmall?.copyWith(
-                            color: context.palette.textTertiary,
-                          ),
-                        ),
+                      CircleIconButton(
+                        icon: Icons.arrow_back_rounded,
+                        tooltip: 'Volver',
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  const PageHeader(
+                    overline: 'Notificaciones',
+                    title: 'Sonido de alerta',
+                    subtitle:
+                        'Toca un sonido para escucharlo. Se aplica a todas tus alertas.',
+                  ),
+                  const SizedBox(height: 24),
+                  SurfaceCard(
+                    padding: EdgeInsets.zero,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < sounds.length; i++) ...[
+                            _SoundTile(
+                              sound: sounds[i],
+                              selected: sounds[i] == settings.notificationSound,
+                              playing: sounds[i] == _playing,
+                              onTap: () => _select(sounds[i]),
+                            ),
+                            if (i != sounds.length - 1)
+                              const Divider(indent: 66, endIndent: 0),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  PButton(
+                    label: 'Probar notificación',
+                    icon: Icons.notifications_active_outlined,
+                    variant: PButtonVariant.secondary,
+                    onPressed: settings.notificationsEnabled
+                        ? () => context
+                              .read<SettingsCubit>()
+                              .sendTestNotification()
+                        : null,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 10, 6, 0),
+                    child: Text(
+                      settings.notificationsEnabled
+                          ? 'Envía una alerta real ahora para oírla como llegará. Si el dispositivo está en silencio no sonará.'
+                          : 'Activa las alertas de vencimiento para enviar una prueba.',
+                      style: context.text.bodySmall?.copyWith(
+                        color: context.palette.textTertiary,
+                      ),
+                    ),
+                  ),
+                ],
               );
             },
           ),

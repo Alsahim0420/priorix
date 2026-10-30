@@ -11,6 +11,7 @@ import '../../../categories/domain/task_category.dart';
 import '../../../categories/presentation/cubit/category_cubit.dart';
 import '../../domain/entities/task.dart';
 import '../task_actions.dart';
+import 'task_links.dart';
 
 class TaskTile extends StatelessWidget {
   const TaskTile({super.key, required this.task, this.showQuadrant = true});
@@ -104,6 +105,8 @@ class TaskTile extends StatelessWidget {
                         label: task.alertThresholds.map((v) => '$v').join('·'),
                         color: p.textTertiary,
                       ),
+                    if (task.links.isNotEmpty)
+                      TaskLinkButton(links: task.links),
                   ],
                 ),
                 if (elapsed != null && !task.isCompleted) ...[
